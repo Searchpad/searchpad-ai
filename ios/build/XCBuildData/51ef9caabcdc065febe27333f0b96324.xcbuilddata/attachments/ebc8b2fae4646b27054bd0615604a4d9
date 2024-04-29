@@ -1,0 +1,23 @@
+{
+  'version': 0,
+  'use-external-names': 'false',
+  'case-sensitive': 'false',
+  'roots': [{
+    'type': 'directory',
+    'name': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Debug-iphoneos/flutter_custom_tabs/flutter_custom_tabs.framework/Modules"
+    'contents': [{
+      'type': 'file',
+      'name': "module.modulemap",
+      'external-contents': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Pods.build/Debug-iphoneos/flutter_custom_tabs.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    'type': 'directory',
+    'name': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Debug-iphoneos/flutter_custom_tabs/flutter_custom_tabs.framework/Headers"
+    'contents': [{
+      'type': 'file',
+      'name': "flutter_custom_tabs-Swift.h",
+      'external-contents': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Pods.build/Debug-iphoneos/flutter_custom_tabs.build/unextended-interface-header.h",
+    }]
+    }]
+}

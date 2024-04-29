@@ -1,0 +1,23 @@
+{
+  'version': 0,
+  'use-external-names': 'false',
+  'case-sensitive': 'false',
+  'roots': [{
+    'type': 'directory',
+    'name': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Debug-iphoneos/FirebaseDatabase/FirebaseDatabase.framework/Modules"
+    'contents': [{
+      'type': 'file',
+      'name': "module.modulemap",
+      'external-contents': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Pods.build/Debug-iphoneos/FirebaseDatabase.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    'type': 'directory',
+    'name': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Debug-iphoneos/FirebaseDatabase/FirebaseDatabase.framework/Headers"
+    'contents': [{
+      'type': 'file',
+      'name': "FirebaseDatabase-Swift.h",
+      'external-contents': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Pods.build/Debug-iphoneos/FirebaseDatabase.build/unextended-interface-header.h",
+    }]
+    }]
+}

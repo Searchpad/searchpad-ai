@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "416835778986",
+    "project_id": "munasbat-2b96c",
+    "storage_bucket": "munasbat-2b96c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:416835778986:android:2a06b82ff6fe114ac253d3",
+        "android_client_info": {
+          "package_name": "com.munas.servicebooking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu4Di8TatxyCIb4F4wWGD7xXA4-NYXHKY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

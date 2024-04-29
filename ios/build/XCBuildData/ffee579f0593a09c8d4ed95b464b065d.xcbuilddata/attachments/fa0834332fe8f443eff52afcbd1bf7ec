@@ -1,0 +1,23 @@
+{
+  'version': 0,
+  'use-external-names': 'false',
+  'case-sensitive': 'false',
+  'roots': [{
+    'type': 'directory',
+    'name': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Debug-iphoneos/nb_utils/nb_utils.framework/Modules"
+    'contents': [{
+      'type': 'file',
+      'name': "module.modulemap",
+      'external-contents': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Pods.build/Debug-iphoneos/nb_utils.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    'type': 'directory',
+    'name': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Debug-iphoneos/nb_utils/nb_utils.framework/Headers"
+    'contents': [{
+      'type': 'file',
+      'name': "nb_utils-Swift.h",
+      'external-contents': "/Users/premjaiswal/Desktop/New Projects/handyman/munasbat/ios/build/Pods.build/Debug-iphoneos/nb_utils.build/unextended-interface-header.h",
+    }]
+    }]
+}
