@@ -1,4 +1,4 @@
-package com.munas.servicebooking
+package com.searchpad.example
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity

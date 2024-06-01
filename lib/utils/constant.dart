@@ -2,7 +2,7 @@ import 'package:nb_utils/nb_utils.dart';
 
 /// DO NOT CHANGE THIS PACKAGE NAME
 var appPackageName =
-    isAndroid ? 'com.munas.servicebooking' : 'com.munas.servicebooking';
+    isAndroid ? 'com.searchpad.example' : 'com.searchpad.example';
 
 //region Common Configs
 const DEFAULT_FIREBASE_PASSWORD = '12345678';

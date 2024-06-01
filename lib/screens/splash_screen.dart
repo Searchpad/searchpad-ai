@@ -6,6 +6,8 @@ import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'walk_through_screen.dart';
+import 'package:booking_system_flutter/screens/auth/pre_sign_in_screen.dart';
+
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -55,10 +57,10 @@ class _SplashScreenState extends State<SplashScreen>
             isNewTask: true, pageRouteAnimation: PageRouteAnimation.Fade);
       } else {
         if (getBoolAsync(IS_FIRST_TIME, defaultValue: true)) {
-          WalkThroughScreen().launch(context,
+          PreSigninScreen().launch(context,
               isNewTask: true, pageRouteAnimation: PageRouteAnimation.Fade);
         } else {
-          DashboardScreen().launch(context,
+          PreSigninScreen().launch(context,
               isNewTask: true, pageRouteAnimation: PageRouteAnimation.Fade);
         }
       }
@@ -74,11 +76,10 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Image.asset(
-        'assets/splash.gif',
-        height: context.height(),
-        width: context.width(),
-        fit: BoxFit.fill,
+      body: Center(
+        child: Image.asset(
+        'assets/images/logo.png',
+      ),
       ),
       // backgroundColor: primaryColor,
       // body: Center(

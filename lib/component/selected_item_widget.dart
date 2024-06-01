@@ -18,9 +18,9 @@ class SelectedItemWidget extends StatelessWidget {
       width: 18,
       decoration: decoration ??
           boxDecorationDefault(
-            color: isSelected ? primaryColor : context.cardColor,
-            border: Border.all(color: primaryColor),
-            shape: BoxShape.circle,
+            color: isSelected ? thirdColor : context.cardColor,
+            border: Border.all(color: thirdColor),
+            shape: BoxShape.rectangle,
           ),
       child: isSelected ? Icon(Icons.check, color: Colors.white, size: itemSize) : Offstage(),
     );

@@ -9,6 +9,7 @@ const appTextPrimaryColor = Color(0xff1C1F34);
 const appTextSecondaryColor = Color(0xff6C757D);
 const cardColor = Color(0xFFF6F7F9);
 const borderColor = Color(0xFFEBEBEB);
+const thirdColor = Color(0xFF6949FF);
 
 const scaffoldColorDark = Color(0xFF0E1116);
 const scaffoldSecondaryDark = Color(0xFF1C1F26);

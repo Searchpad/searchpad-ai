@@ -23,17 +23,21 @@ class AuthService {
 
   //region Google Login
   Future<LoginResponse?> signInWithGoogle(BuildContext context) async {
-    GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
+    GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
     if (googleSignInAccount != null) {
-      final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+      
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
         idToken: googleSignInAuthentication.idToken,
       );
 
-      final UserCredential authResult = await _auth.signInWithCredential(credential);
+      final UserCredential authResult =
+          await _auth.signInWithCredential(credential);
       final User user = authResult.user!;
 
       assert(!user.isAnonymous);
@@ -45,8 +49,10 @@ class AuthService {
 
       String firstName = '';
       String lastName = '';
-      if (currentUser.displayName.validate().split(' ').length >= 1) firstName = currentUser.displayName.splitBefore(' ');
-      if (currentUser.displayName.validate().split(' ').length >= 2) lastName = currentUser.displayName.splitAfter(' ');
+      if (currentUser.displayName.validate().split(' ').length >= 1)
+        firstName = currentUser.displayName.splitBefore(' ');
+      if (currentUser.displayName.validate().split(' ').length >= 2)
+        lastName = currentUser.displayName.splitAfter(' ');
 
       /// Create a temporary request to send
       UserData tempUserData = UserData()
@@ -60,8 +66,11 @@ class AuthService {
         ..loginType = LOGIN_TYPE_GOOGLE
         ..playerId = getStringAsync(PLAYERID)
         ..uid = user.uid
-        ..username = (currentUser.email.validate().splitBefore('@').replaceAll('.', '')).toLowerCase();
-      return await loginCurrentUsers(context, req: tempUserData.toJson(), isSocialLogin: true);
+        ..username =
+            (currentUser.email.validate().splitBefore('@').replaceAll('.', ''))
+                .toLowerCase();
+      return await loginCurrentUsers(context,
+          req: tempUserData.toJson(), isSocialLogin: true);
     } else {
       appStore.setLoading(false);
       throw USER_NOT_CREATED;
@@ -72,8 +81,13 @@ class AuthService {
 
   //region Email
 
-  Future<String> signUpWithEmailPassword(BuildContext context, {required UserData userData}) async {
-    return await _auth.createUserWithEmailAndPassword(email: userData.email.validate(), password: DEFAULT_FIREBASE_PASSWORD).then((userCredential) async {
+  Future<String> signUpWithEmailPassword(BuildContext context,
+      {required UserData userData}) async {
+    return await _auth
+        .createUserWithEmailAndPassword(
+            email: userData.email.validate(),
+            password: DEFAULT_FIREBASE_PASSWORD)
+        .then((userCredential) async {
       User currentUser = userCredential.user!;
 
       userData.uid = currentUser.uid.validate();
@@ -89,11 +103,15 @@ class AuthService {
     });
   }
 
-  Future<String> signInWithEmailPassword({required String email, String? uid, bool isSocialLogin = false}) async {
+  Future<String> signInWithEmailPassword(
+      {required String email, String? uid, bool isSocialLogin = false}) async {
     if (isSocialLogin) {
       return uid.validate();
     }
-    return await _auth.signInWithEmailAndPassword(email: email, password: DEFAULT_FIREBASE_PASSWORD).then((value) async {
+    return await _auth
+        .signInWithEmailAndPassword(
+            email: email, password: DEFAULT_FIREBASE_PASSWORD)
+        .then((value) async {
       return value.user!.uid.validate();
     }).catchError((e) async {
       appStore.setLoading(false);
@@ -105,7 +123,10 @@ class AuthService {
   //endregion
 
   Future<String> setRegisterData({required UserData userData}) async {
-    return await userService.addDocumentWithCustomId(userData.uid.validate(), userData.toFirebaseJson()).then((value) async {
+    return await userService
+        .addDocumentWithCustomId(
+            userData.uid.validate(), userData.toFirebaseJson())
+        .then((value) async {
       return value.id.validate();
     }).catchError((e) {
       throw false;
@@ -113,7 +134,10 @@ class AuthService {
   }
 
   //region Google OTP
-  Future loginWithOTP(BuildContext context, {String phoneNumber = "", String? countryCode, String? countryISOCode}) async {
+  Future loginWithOTP(BuildContext context,
+      {String phoneNumber = "",
+      String? countryCode,
+      String? countryISOCode}) async {
     log("PHONE NUMBER VERIFIED +$countryCode$phoneNumber");
 
     return await _auth.verifyPhoneNumber(
@@ -138,9 +162,12 @@ class AuthService {
         await OtpDialogComponent(
           onTap: (otpCode) async {
             if (otpCode != null) {
-              AuthCredential credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: otpCode);
+              AuthCredential credential = PhoneAuthProvider.credential(
+                  verificationId: verificationId, smsCode: otpCode);
 
-              await _auth.signInWithCredential(credential).then((credentials) async {
+              await _auth
+                  .signInWithCredential(credential)
+                  .then((credentials) async {
                 Map<String, dynamic> request = {
                   'username': phoneNumber,
                   'password': phoneNumber,
@@ -153,23 +180,35 @@ class AuthService {
 
                 log("UID ${credentials.user!.uid}");
 
-                await loginCurrentUsers(context, req: request, isSocialLogin: true).then((loginResponse) async {
+                await loginCurrentUsers(context,
+                        req: request, isSocialLogin: true)
+                    .then((loginResponse) async {
                   log("=============================== ${loginResponse.toJson()}");
 
                   if (loginResponse.isUserExist == null) {
                     if (loginResponse.userData!.status == 0) {
                       toast(language.contactAdmin);
                     } else {
-                      loginResponse.userData!.uid = credentials.user!.uid.validate();
-                      saveDataToPreference(context, userData: loginResponse.userData!, isSocialLogin: true, onRedirectionClick: () {
-                        DashboardScreen().launch(context, isNewTask: true, pageRouteAnimation: PageRouteAnimation.Fade);
+                      loginResponse.userData!.uid =
+                          credentials.user!.uid.validate();
+                      saveDataToPreference(context,
+                          userData: loginResponse.userData!,
+                          isSocialLogin: true, onRedirectionClick: () {
+                        DashboardScreen().launch(context,
+                            isNewTask: true,
+                            pageRouteAnimation: PageRouteAnimation.Fade);
                       });
                     }
                   } else {
                     toast(language.confirmOTP);
                     appStore.setLoading(false);
                     finish(context);
-                    SignUpScreen(isOTPLogin: true, phoneNumber: phoneNumber, countryCode: countryISOCode, uid: credentials.user!.uid.validate()).launch(context);
+                    SignUpScreen(
+                            isOTPLogin: true,
+                            phoneNumber: phoneNumber,
+                            countryCode: countryISOCode,
+                            uid: credentials.user!.uid.validate())
+                        .launch(context);
                   }
                 }).catchError((e) {
                   appStore.setLoading(false);
@@ -177,7 +216,8 @@ class AuthService {
                 });
               }).catchError((e) {
                 if (e.code.toString() == 'invalid-verification-code') {
-                  toast(language.theEnteredCodeIsInvalidPleaseTryAgain, print: true);
+                  toast(language.theEnteredCodeIsInvalidPleaseTryAgain,
+                      print: true);
                 } else {
                   toast(e.message.toString(), print: true);
                 }
@@ -194,11 +234,16 @@ class AuthService {
   }
 
 //endregion
-  Future<void> loginFromFirebaseUser(User currentUser, {LoginResponse? loginData, String? displayName, String? loginType}) async {
+  Future<void> loginFromFirebaseUser(User currentUser,
+      {LoginResponse? loginData,
+      String? displayName,
+      String? loginType}) async {
     if (await userService.isUserExist(loginData!.userData!.email)) {
       log("Firebase User Exist");
 
-      await userService.userByEmail(loginData.userData!.email).then((user) async {
+      await userService
+          .userByEmail(loginData.userData!.email)
+          .then((user) async {
         await saveUserData(loginData.userData!);
       }).catchError((e) {
         log(e);
@@ -215,7 +260,10 @@ class AuthService {
         loginData.userData!.displayName = displayName;
       }
 
-      await userService.addDocumentWithCustomId(currentUser.uid.validate(), loginData.userData!.toJson()).then((value) async {
+      await userService
+          .addDocumentWithCustomId(
+              currentUser.uid.validate(), loginData.userData!.toJson())
+          .then((value) async {
         log("Firebase User Created");
         await saveUserData(loginData.userData!);
       }).catchError((e) {
@@ -237,7 +285,8 @@ class AuthService {
           final oAuthProvider = OAuthProvider('apple.com');
           final credential = oAuthProvider.credential(
             idToken: String.fromCharCodes(appleIdCredential.identityToken!),
-            accessToken: String.fromCharCodes(appleIdCredential.authorizationCode!),
+            accessToken:
+                String.fromCharCodes(appleIdCredential.authorizationCode!),
           );
 
           final authResult = await _auth.signInWithCredential(credential);
@@ -288,10 +337,14 @@ class AuthService {
     log('appleFamilyName:- ${getStringAsync(APPLE_FAMILY_NAME)}');
 
     var req = {
-      'email': getStringAsync(APPLE_EMAIL).isNotEmpty ? getStringAsync(APPLE_EMAIL) : getStringAsync(APPLE_UID) + '@gmail.com',
+      'email': getStringAsync(APPLE_EMAIL).isNotEmpty
+          ? getStringAsync(APPLE_EMAIL)
+          : getStringAsync(APPLE_UID) + '@gmail.com',
       'first_name': getStringAsync(APPLE_GIVE_NAME),
       'last_name': getStringAsync(APPLE_FAMILY_NAME),
-      "username": getStringAsync(APPLE_EMAIL).isNotEmpty ? getStringAsync(APPLE_EMAIL) : getStringAsync(APPLE_UID) + '@gmail.com',
+      "username": getStringAsync(APPLE_EMAIL).isNotEmpty
+          ? getStringAsync(APPLE_EMAIL)
+          : getStringAsync(APPLE_UID) + '@gmail.com',
       "profile_image": '',
       "social_image": '',
       'accessToken': '12345678',
@@ -302,7 +355,10 @@ class AuthService {
     log("Apple Login Json" + jsonEncode(req));
 
     await loginUser(req, isSocialLogin: true).then((value) async {
-      await loginFromFirebaseUser(user, loginData: value, displayName: value.userData!.displayName.validate(), loginType: LOGIN_TYPE_APPLE);
+      await loginFromFirebaseUser(user,
+          loginData: value,
+          displayName: value.userData!.displayName.validate(),
+          loginType: LOGIN_TYPE_APPLE);
     }).catchError((e) {
       log(e.toString());
       throw e;

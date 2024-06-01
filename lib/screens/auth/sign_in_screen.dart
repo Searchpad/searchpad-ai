@@ -1,23 +1,24 @@
 import 'package:booking_system_flutter/component/back_widget.dart';
 import 'package:booking_system_flutter/component/base_scaffold_body.dart';
+import 'package:booking_system_flutter/component/custom_button.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/auth/auth_user_services.dart';
 import 'package:booking_system_flutter/screens/auth/email_verification.dart';
 import 'package:booking_system_flutter/screens/auth/forgot_password_screen.dart';
 import 'package:booking_system_flutter/screens/auth/otp_login_screen.dart';
+import 'package:booking_system_flutter/screens/auth/referral_screen.dart';
 import 'package:booking_system_flutter/screens/auth/sign_up_screen.dart';
 import 'package:booking_system_flutter/screens/dashboard/dashboard_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
-import 'package:booking_system_flutter/utils/configs.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:booking_system_flutter/utils/images.dart';
 import 'package:booking_system_flutter/utils/string_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SignInScreen extends StatefulWidget {
   final bool? isFromDashboard;
@@ -110,9 +111,12 @@ class _SignInScreenState extends State<SignInScreen> {
       'player_id': getStringAsync(PLAYERID),
     };
 
+    appStore.emailAddress = emailCont.text.trim();
+
     log(request);
 
-    await loginCurrentUsers(context, req: request).then((value) async {
+    await loginCurrentUsers(context, req: request, index: 2)
+        .then((value) async {
       if (isRemember) {
         setValue(USER_EMAIL, emailCont.text);
         setValue(USER_PASSWORD, passwordCont.text);
@@ -168,8 +172,12 @@ class _SignInScreenState extends State<SignInScreen> {
 
       finish(context, true);
     } else {
-      DashboardScreen().launch(context,
-          isNewTask: true, pageRouteAnimation: PageRouteAnimation.Fade);
+      Navigator.pop(context);
+      // DashboardScreen().launch(context,
+      //     isNewTask: true, pageRouteAnimation: PageRouteAnimation.Fade);
+      ReferralScreen(
+        email: appStore.emailAddress,
+      ).launch(context);
     }
 
     appStore.setLoading(false);
@@ -191,18 +199,263 @@ class _SignInScreenState extends State<SignInScreen> {
 //endregion
 
 //region Widgets
+  // Widget _buildTopWidget() {
+  //   return Container(
+  //     child: Column(
+  //       children: [
+  //         Text("${language.lblLoginTitle}!", style: boldTextStyle(size: 20))
+  //             .center(),
+  //         16.height,
+  //         Text(language.lblLoginSubTitle,
+  //                 style: primaryTextStyle(size: 14),
+  //                 textAlign: TextAlign.center)
+  //             .center()
+  //             .paddingSymmetric(horizontal: 32),
+  //         32.height,
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildFormWidget() {
+  //   return AutofillGroup(
+  //     child: Column(
+  //       children: [
+  //         AppTextField(
+  //           textFieldType: TextFieldType.EMAIL_ENHANCED,
+  //           controller: emailCont,
+  //           focus: emailFocus,
+  //           nextFocus: passwordFocus,
+  //           errorThisFieldRequired: language.requiredText,
+  //           decoration:
+  //               inputDecoration(context, labelText: language.hintEmailTxt),
+  //           suffix: ic_message.iconImage(size: 10).paddingAll(14),
+  //           autoFillHints: [AutofillHints.email],
+  //         ),
+  //         16.height,
+  //         AppTextField(
+  //           textFieldType: TextFieldType.PASSWORD,
+  //           controller: passwordCont,
+  //           focus: passwordFocus,
+  //           suffixPasswordVisibleWidget:
+  //               ic_show.iconImage(size: 10).paddingAll(14),
+  //           suffixPasswordInvisibleWidget:
+  //               ic_hide.iconImage(size: 10).paddingAll(14),
+  //           decoration:
+  //               inputDecoration(context, labelText: language.hintPasswordTxt),
+  //           autoFillHints: [AutofillHints.password],
+  //           onFieldSubmitted: (s) {
+  //             _handleLogin();
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildRememberWidget() {
+  //   return Column(
+  //     children: [
+  //       8.height,
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           RoundedCheckBox(
+  //             borderColor: context.primaryColor,
+  //             checkedColor: context.primaryColor,
+  //             isChecked: isRemember,
+  //             text: language.rememberMe,
+  //             textStyle: secondaryTextStyle(),
+  //             size: 20,
+  //             onTap: (value) async {
+  //               await setValue(IS_REMEMBERED, isRemember);
+  //               isRemember = !isRemember;
+  //               setState(() {});
+  //             },
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               showInDialog(
+  //                 context,
+  //                 contentPadding: EdgeInsets.zero,
+  //                 dialogAnimation: DialogAnimation.SLIDE_TOP_BOTTOM,
+  //                 builder: (_) => ForgotPasswordScreen(),
+  //               );
+  //             },
+  //             child: Text(
+  //               language.forgotPassword,
+  //               style: boldTextStyle(
+  //                   color: primaryColor, fontStyle: FontStyle.italic),
+  //               textAlign: TextAlign.right,
+  //             ),
+  //           ).flexible(),
+  //         ],
+  //       ),
+  //       24.height,
+  //       AppButton(
+  //         text: language.signIn,
+  //         color: primaryColor,
+  //         textColor: Colors.white,
+  //         width: context.width() - context.navigationBarHeight,
+  //         onTap: () {
+  //           _handleLogin();
+  //         },
+  //       ),
+  //       16.height,
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           Text(language.doNotHaveAccount, style: secondaryTextStyle()),
+  //           TextButton(
+  //             onPressed: () {
+  //               hideKeyboard(context);
+  //               SignUpScreen().launch(context);
+  //             },
+  //             child: Text(
+  //               language.signUp,
+  //               style: boldTextStyle(
+  //                 color: primaryColor,
+  //                 decoration: TextDecoration.underline,
+  //                 fontStyle: FontStyle.italic,
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       // TextButton(
+  //       //   onPressed: () {
+  //       //     if (isAndroid) {
+  //       //       if (getStringAsync(PROVIDER_PLAY_STORE_URL).isNotEmpty) {
+  //       //         launchUrl(Uri.parse(getStringAsync(PROVIDER_PLAY_STORE_URL)),
+  //       //             mode: LaunchMode.externalApplication);
+  //       //       } else {
+  //       //         launchUrl(
+  //       //             Uri.parse(
+  //       //                 '${getSocialMediaLink(LinkProvider.PLAY_STORE)}$PROVIDER_PACKAGE_NAME'),
+  //       //             mode: LaunchMode.externalApplication);
+  //       //       }
+  //       //     } else if (isIOS) {
+  //       //       if (getStringAsync(PROVIDER_APPSTORE_URL).isNotEmpty) {
+  //       //         commonLaunchUrl(getStringAsync(PROVIDER_APPSTORE_URL));
+  //       //       } else {
+  //       //         commonLaunchUrl(IOS_LINK_FOR_PARTNER);
+  //       //       }
+  //       //     }
+  //       //   },
+  //       //   child: Text(language.lblRegisterAsPartner,
+  //       //       style: boldTextStyle(color: primaryColor)),
+  //       // )
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildSocialWidget() {
+  //   return Column(
+  //     children: [
+  //       20.height,
+  //       Row(
+  //         children: [
+  //           Divider(color: context.dividerColor, thickness: 2).expand(),
+  //           16.width,
+  //           Text(language.lblOrContinueWith, style: secondaryTextStyle()),
+  //           16.width,
+  //           Divider(color: context.dividerColor, thickness: 2).expand(),
+  //         ],
+  //       ),
+  //       24.height,
+  //       AppButton(
+  //         text: '',
+  //         color: context.cardColor,
+  //         padding: EdgeInsets.all(8),
+  //         textStyle: boldTextStyle(),
+  //         width: context.width() - context.navigationBarHeight,
+  //         child: Row(
+  //           children: [
+  //             Container(
+  //               padding: EdgeInsets.all(12),
+  //               decoration: boxDecorationWithRoundedCorners(
+  //                 backgroundColor: primaryColor.withOpacity(0.1),
+  //                 boxShape: BoxShape.circle,
+  //               ),
+  //               child: GoogleLogoWidget(size: 16),
+  //             ),
+  //             Text(language.lblSignInWithGoogle,
+  //                     style: boldTextStyle(size: 12),
+  //                     textAlign: TextAlign.center)
+  //                 .expand(),
+  //           ],
+  //         ),
+  //         onTap: googleSignIn,
+  //       ),
+  //       16.height,
+  //       AppButton(
+  //         text: '',
+  //         color: context.cardColor,
+  //         padding: EdgeInsets.all(8),
+  //         textStyle: boldTextStyle(),
+  //         width: context.width() - context.navigationBarHeight,
+  //         child: Row(
+  //           children: [
+  //             Container(
+  //               padding: EdgeInsets.all(8),
+  //               decoration: boxDecorationWithRoundedCorners(
+  //                 backgroundColor: primaryColor.withOpacity(0.1),
+  //                 boxShape: BoxShape.circle,
+  //               ),
+  //               child: ic_calling
+  //                   .iconImage(size: 18, color: primaryColor)
+  //                   .paddingAll(4),
+  //             ),
+  //             Text(language.lblSignInWithOTP,
+  //                     style: boldTextStyle(size: 12),
+  //                     textAlign: TextAlign.center)
+  //                 .expand(),
+  //           ],
+  //         ),
+  //         onTap: otpSignIn,
+  //       ),
+  //       16.height,
+  //       if (isIOS)
+  //         AppButton(
+  //           text: '',
+  //           color: context.cardColor,
+  //           padding: EdgeInsets.all(8),
+  //           textStyle: boldTextStyle(),
+  //           width: context.width() - context.navigationBarHeight,
+  //           child: Row(
+  //             children: [
+  //               Container(
+  //                 padding: EdgeInsets.all(8),
+  //                 decoration: boxDecorationWithRoundedCorners(
+  //                   backgroundColor: primaryColor.withOpacity(0.1),
+  //                   boxShape: BoxShape.circle,
+  //                 ),
+  //                 child: Icon(Icons.apple),
+  //               ),
+  //               Text(language.lblSignInWithApple,
+  //                       style: boldTextStyle(size: 12),
+  //                       textAlign: TextAlign.center)
+  //                   .expand(),
+  //             ],
+  //           ),
+  //           onTap: appleSign,
+  //         ),
+  //     ],
+  //   );
+  // }
+
   Widget _buildTopWidget() {
     return Container(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("${language.lblLoginTitle}!", style: boldTextStyle(size: 20))
-              .center(),
+          Text("Welcome back👋", style: boldTextStyle(size: 28))
+              .paddingSymmetric(horizontal: 10),
           16.height,
-          Text(language.lblLoginSubTitle,
-                  style: primaryTextStyle(size: 14),
-                  textAlign: TextAlign.center)
-              .center()
-              .paddingSymmetric(horizontal: 32),
+          Text(
+            'Please enter your email & password to sign in.',
+            style: primaryTextStyle(size: 14),
+          ).paddingSymmetric(horizontal: 10),
           32.height,
         ],
       ),
@@ -219,26 +472,25 @@ class _SignInScreenState extends State<SignInScreen> {
             focus: emailFocus,
             nextFocus: passwordFocus,
             errorThisFieldRequired: language.requiredText,
-            decoration:
-                inputDecoration(context, labelText: language.hintEmailTxt),
+            decoration: inputDecoration(
+              context,
+              labelText: language.hintEmailTxt,
+            ),
             suffix: ic_message.iconImage(size: 10).paddingAll(14),
             autoFillHints: [AutofillHints.email],
           ),
-          16.height,
+          30.height,
           AppTextField(
             textFieldType: TextFieldType.PASSWORD,
             controller: passwordCont,
             focus: passwordFocus,
             suffixPasswordVisibleWidget:
-                ic_show.iconImage(size: 10).paddingAll(14),
+                ic_show.iconImage(size: 10, color: thirdColor).paddingAll(14),
             suffixPasswordInvisibleWidget:
-                ic_hide.iconImage(size: 10).paddingAll(14),
+                ic_hide.iconImage(size: 10, color: thirdColor).paddingAll(14),
             decoration:
                 inputDecoration(context, labelText: language.hintPasswordTxt),
             autoFillHints: [AutofillHints.password],
-            onFieldSubmitted: (s) {
-              _handleLogin();
-            },
           ),
         ],
       ),
@@ -248,16 +500,16 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _buildRememberWidget() {
     return Column(
       children: [
-        8.height,
+        20.height,
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             RoundedCheckBox(
-              borderColor: context.primaryColor,
-              checkedColor: context.primaryColor,
+              borderColor: thirdColor,
+              checkedColor: thirdColor,
               isChecked: isRemember,
               text: language.rememberMe,
-              textStyle: secondaryTextStyle(),
+              textStyle: primaryTextStyle(),
               size: 20,
               onTap: (value) async {
                 await setValue(IS_REMEMBERED, isRemember);
@@ -265,78 +517,46 @@ class _SignInScreenState extends State<SignInScreen> {
                 setState(() {});
               },
             ),
-            TextButton(
-              onPressed: () {
-                showInDialog(
-                  context,
-                  contentPadding: EdgeInsets.zero,
-                  dialogAnimation: DialogAnimation.SLIDE_TOP_BOTTOM,
-                  builder: (_) => ForgotPasswordScreen(),
-                );
-              },
-              child: Text(
-                language.forgotPassword,
-                style: boldTextStyle(
-                    color: primaryColor, fontStyle: FontStyle.italic),
-                textAlign: TextAlign.right,
-              ),
-            ).flexible(),
           ],
         ),
-        24.height,
-        AppButton(
-          text: language.signIn,
-          color: primaryColor,
-          textColor: Colors.white,
-          width: context.width() - context.navigationBarHeight,
-          onTap: () {
-            _handleLogin();
+        15.height,
+        Divider(color: context.dividerColor, thickness: 2),
+        TextButton(
+          onPressed: () {
+            showInDialog(
+              context,
+              contentPadding: EdgeInsets.zero,
+              dialogAnimation: DialogAnimation.SLIDE_TOP_BOTTOM,
+              builder: (_) => ForgotPasswordScreen(),
+            );
           },
+          child: Text(
+            language.forgotPassword,
+            style: boldTextStyle(color: thirdColor, size: 16),
+            textAlign: TextAlign.right,
+          ),
         ),
-        16.height,
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(language.doNotHaveAccount, style: secondaryTextStyle()),
+            Text(language.doNotHaveAccount,
+                style: secondaryTextStyle(
+                    color: textPrimaryColorGlobal, size: 14)),
             TextButton(
               onPressed: () {
                 hideKeyboard(context);
                 SignUpScreen().launch(context);
+                // ReferralScreen().launch(context);
               },
               child: Text(
                 language.signUp,
                 style: boldTextStyle(
-                  color: primaryColor,
-                  decoration: TextDecoration.underline,
-                  fontStyle: FontStyle.italic,
+                  color: thirdColor,
                 ),
               ),
             ),
           ],
         ),
-        // TextButton(
-        //   onPressed: () {
-        //     if (isAndroid) {
-        //       if (getStringAsync(PROVIDER_PLAY_STORE_URL).isNotEmpty) {
-        //         launchUrl(Uri.parse(getStringAsync(PROVIDER_PLAY_STORE_URL)),
-        //             mode: LaunchMode.externalApplication);
-        //       } else {
-        //         launchUrl(
-        //             Uri.parse(
-        //                 '${getSocialMediaLink(LinkProvider.PLAY_STORE)}$PROVIDER_PACKAGE_NAME'),
-        //             mode: LaunchMode.externalApplication);
-        //       }
-        //     } else if (isIOS) {
-        //       if (getStringAsync(PROVIDER_APPSTORE_URL).isNotEmpty) {
-        //         commonLaunchUrl(getStringAsync(PROVIDER_APPSTORE_URL));
-        //       } else {
-        //         commonLaunchUrl(IOS_LINK_FOR_PARTNER);
-        //       }
-        //     }
-        //   },
-        //   child: Text(language.lblRegisterAsPartner,
-        //       style: boldTextStyle(color: primaryColor)),
-        // )
       ],
     );
   }
@@ -349,89 +569,58 @@ class _SignInScreenState extends State<SignInScreen> {
           children: [
             Divider(color: context.dividerColor, thickness: 2).expand(),
             16.width,
-            Text(language.lblOrContinueWith, style: secondaryTextStyle()),
+            Text(language.lblOrContinueWith, style: primaryTextStyle(size: 12)),
             16.width,
             Divider(color: context.dividerColor, thickness: 2).expand(),
           ],
         ),
         24.height,
-        AppButton(
-          text: '',
-          color: context.cardColor,
-          padding: EdgeInsets.all(8),
-          textStyle: boldTextStyle(),
-          width: context.width() - context.navigationBarHeight,
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: boxDecorationWithRoundedCorners(
-                  backgroundColor: primaryColor.withOpacity(0.1),
-                  boxShape: BoxShape.circle,
-                ),
-                child: GoogleLogoWidget(size: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            InkWell(
+              onTap: () {
+                // googleSignIn();
+              },
+              child: CustomButton(
+                "",
+                0.4,
+                icon: ic_google,
+                index: 2,
               ),
-              Text(language.lblSignInWithGoogle,
-                      style: boldTextStyle(size: 12),
-                      textAlign: TextAlign.center)
-                  .expand(),
-            ],
-          ),
-          onTap: googleSignIn,
-        ),
-        16.height,
-        AppButton(
-          text: '',
-          color: context.cardColor,
-          padding: EdgeInsets.all(8),
-          textStyle: boldTextStyle(),
-          width: context.width() - context.navigationBarHeight,
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(8),
-                decoration: boxDecorationWithRoundedCorners(
-                  backgroundColor: primaryColor.withOpacity(0.1),
-                  boxShape: BoxShape.circle,
-                ),
-                child: ic_calling
-                    .iconImage(size: 18, color: primaryColor)
-                    .paddingAll(4),
-              ),
-              Text(language.lblSignInWithOTP,
-                      style: boldTextStyle(size: 12),
-                      textAlign: TextAlign.center)
-                  .expand(),
-            ],
-          ),
-          onTap: otpSignIn,
-        ),
-        16.height,
-        if (isIOS)
-          AppButton(
-            text: '',
-            color: context.cardColor,
-            padding: EdgeInsets.all(8),
-            textStyle: boldTextStyle(),
-            width: context.width() - context.navigationBarHeight,
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: boxDecorationWithRoundedCorners(
-                    backgroundColor: primaryColor.withOpacity(0.1),
-                    boxShape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.apple),
-                ),
-                Text(language.lblSignInWithApple,
-                        style: boldTextStyle(size: 12),
-                        textAlign: TextAlign.center)
-                    .expand(),
-              ],
             ),
-            onTap: appleSign,
+            30.width,
+            InkWell(
+              onTap: () {
+                // appleSign();
+              },
+              child: CustomButton(
+                "",
+                0.4,
+                icon: ic_apple,
+              ),
+            )
+          ],
+        ),
+        10.height,
+        Divider(color: context.dividerColor, thickness: 2),
+        10.height,
+        InkWell(
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (con) {
+                  return MyDialog();
+                });
+            _handleLogin();
+          },
+          child: CustomButton(
+            "Sign in",
+            0.9,
+            color: thirdColor,
+            index: 3,
           ),
+        ),
       ],
     );
   }
@@ -482,15 +671,71 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                (context.height() * 0.05).toInt().height,
                 _buildTopWidget(),
                 _buildFormWidget(),
                 _buildRememberWidget(),
-                // if (!getBoolAsync(HAS_IN_REVIEW)) _buildSocialWidget(),
+                _buildSocialWidget(),
                 30.height,
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class MyDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              "assets/images/success.png",
+              height: 180,
+              width: 180,
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Text(
+              "Sign in Successful!",
+              style: boldTextStyle(color: thirdColor, size: 20),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              "Please wait...",
+              style: boldTextStyle(size: 14),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              "You will be directed to the homepage.",
+              style: boldTextStyle(size: 14),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Center(
+                child: LoadingAnimationWidget.hexagonDots(
+              color: thirdColor,
+              size: 60,
+            ))
+          ],
         ),
       ),
     );

@@ -1,10 +1,13 @@
 import 'package:booking_system_flutter/component/cached_image_widget.dart';
 import 'package:booking_system_flutter/component/loader_widget.dart';
+import 'package:booking_system_flutter/generate/generate_course.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/about_screen.dart';
 import 'package:booking_system_flutter/screens/auth/change_password_screen.dart';
 import 'package:booking_system_flutter/screens/auth/edit_profile_screen.dart';
+import 'package:booking_system_flutter/screens/auth/pre_sign_in_screen.dart';
+import 'package:booking_system_flutter/screens/auth/referral_screen.dart';
 import 'package:booking_system_flutter/screens/auth/sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/chat/conversation_list_screen.dart';
 import 'package:booking_system_flutter/screens/dashboard/customer_rating_screen.dart';
@@ -280,6 +283,19 @@ class ProfileFragmentState extends State<ProfileFragment> {
                             });
                           },
                         ),
+                        SettingItemWidget(
+                          leading: ic_chat.iconImage(size: SETTING_ICON_SIZE),
+                          title: language.chatBot,
+                          trailing: trailing,
+                          onTap: () async {
+                            doIfLoggedIn(context, () {
+                              // GenerateCourse().launch(context);
+                              ReferralScreen(
+                                email: appStore.emailAddress,
+                              ).launch(context);
+                            });
+                          },
+                        ),
                       ],
                     );
                   }),
@@ -346,7 +362,7 @@ class ProfileFragmentState extends State<ProfileFragment> {
                             color: context.iconColor, size: SETTING_ICON_SIZE),
                         title: language.signIn,
                         onTap: () {
-                          SignInScreen().launch(context);
+                          PreSigninScreen().launch(context);
                         },
                       ).visible(!appStore.isLoggedIn),
                     ],

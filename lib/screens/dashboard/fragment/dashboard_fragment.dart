@@ -3,6 +3,7 @@ import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/dashboard_model.dart';
 import 'package:booking_system_flutter/model/product_list_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
+import 'package:booking_system_flutter/screens/auth/pre_sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/auth/sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/auth/sign_up_screen.dart';
 import 'package:booking_system_flutter/screens/dashboard/component/featured_product_list_component.dart';
@@ -234,7 +235,7 @@ class MyDialog extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    SignInScreen().launch(context);
+                    PreSigninScreen().launch(context);
                   },
                   child: Text(language.signIn,
                       style: primaryTextStyle(weight: FontWeight.bold)),

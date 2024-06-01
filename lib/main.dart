@@ -28,6 +28,7 @@ import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/configs.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
+import 'package:booking_system_flutter/screens/auth/sign_in_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -80,6 +81,20 @@ List<(int bookingId, BookingDetailResponse list)?> cachedBookingDetailList = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Firebase.apps.forEach((app) => app.delete());
+
+  await Firebase.initializeApp(
+      options: const FirebaseOptions(
+    apiKey: 'AIzaSyAYsBmShmc1cRgUexFnHduGOZcVoGXaiyo',
+    appId: '1:706368463900:android:e0fc8776ee1d1e66392bd9',
+    messagingSenderId: '706368463900',
+    projectId: 'searchpad-50f8d',
+    storageBucket: 'searchpad-50f8d.appspot.com',
+  )).then((value) {
+    // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    // setupFirebaseRemoteConfig();
+  });
 
   passwordLengthGlobal = 6;
   appButtonBackgroundColorGlobal = primaryColor;
@@ -98,11 +113,6 @@ void main() async {
   await initialize();
   localeLanguageList = languageList();
 
-  Firebase.initializeApp().then((value) {
-    // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-
-    // setupFirebaseRemoteConfig();
-  });
   ConnectionStatusSingleton connectionStatus =
       ConnectionStatusSingleton.getInstance();
   connectionStatus.initialize();
@@ -215,7 +225,7 @@ class _MyAppState extends State<MyApp> {
                       locale,
                   locale: Locale(appStore.selectedLanguageCode),
                   routes: {
-                    '/first': (context) => DashboardScreen(),
+                    '/first': (context) => SignInScreen(),
                   },
                 ),
               ),

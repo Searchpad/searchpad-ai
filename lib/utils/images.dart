@@ -1,4 +1,5 @@
 const appLogo = 'assets/playstore.png';
+const logo = 'assets/images/logo.png';
 
 //region Images
 const about_us_page = 'assets/images/about_us_page.png';
@@ -13,9 +14,12 @@ const walk_Img1 = 'assets/images/walkthrough_1.png';
 const walk_Img2 = 'assets/images/walkthrough_2.png';
 const walk_Img3 = 'assets/images/walkthrough_3.png';
 const walk_Img4 = 'assets/images/walkthrough_4.png';
+const success = 'assets/images/success.png';
 //endregion
 
 //region Icons
+const ic_google = 'assets/icons/google_icon.png';
+const ic_apple = 'assets/icons/apple_icon.png';
 const ic_about_us = 'assets/icons/ic_about_us.png';
 const ic_customer_rating_stars = 'assets/icons/ic_stars.png';
 const selectImage = 'assets/icons/ic_selectImage.png';
@@ -53,6 +57,7 @@ const ic_active_location = 'assets/icons/ic_active_location.png';
 const ic_featured = 'assets/icons/ic_featured.png';
 const ic_hide = 'assets/icons/ic_hide.png';
 const ic_show = 'assets/icons/ic_show.png';
+const ic_invite = 'assets/icons/invite_icon.png';
 const ic_no_photo = "assets/icons/ic_no_photo.png";
 const ic_slider_status = "assets/icons/ic_slider_status.png";
 const ic_setting = "assets/icons/ic_setting.png";

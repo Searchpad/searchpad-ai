@@ -499,6 +499,18 @@ class LanguageEn extends BaseLanguage {
   String get lblAboutApp => "About App";
 
   @override
+  String get chatBot => "Chat with AI";
+
+  @override
+  String get industry => "Industry";
+
+  @override
+  String get generateAI => "Generate with AI";
+
+  @override
+  String get threadAI => "Threads AI,";
+
+  @override
   String get lblPurchaseCode => "Purchase Full Source Code";
 
   @override
@@ -625,7 +637,7 @@ class LanguageEn extends BaseLanguage {
   String get lblSubcategories => "Subcategories";
 
   @override
-  String get lblAgree => "I agree to the";
+  String get lblAgree => "I agree to Searchpad";
 
   @override
   String get lblTermsOfService => "Terms of Service";

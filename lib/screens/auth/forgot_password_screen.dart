@@ -68,7 +68,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               padding: EdgeInsets.all(16),
               width: context.width(),
               decoration: boxDecorationDefault(
-                color: context.primaryColor,
+                color: thirdColor,
                 borderRadius: radiusOnly(topRight: defaultRadius, topLeft: defaultRadius),
               ),
               child: Row(
@@ -104,7 +104,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 16.height,
                 AppButton(
                   text: language.resetPassword,
-                  color: primaryColor,
+                  color: thirdColor,
                   textColor: Colors.white,
                   width: context.width() - context.navigationBarHeight,
                   onTap: () {

@@ -64,9 +64,9 @@ Future createUser(Map request) async {
 }
 
 Future<LoginResponse> loginUser(Map request,
-    {bool isSocialLogin = false}) async {
+    {bool isSocialLogin = false, int index =1}) async {
   request.remove("uid");
-  appStore.setLoading(true);
+  if(index == 1) appStore.setLoading(true);
   LoginResponse res = LoginResponse.fromJson(await handleResponse(
       await buildHttpResponse(isSocialLogin ? 'social-login' : 'login',
           request: request, method: HttpMethodType.POST)));

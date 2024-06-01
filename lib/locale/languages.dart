@@ -511,6 +511,14 @@ abstract class BaseLanguage {
 
   String get myReviews;
 
+  String get chatBot;
+
+  String get generateAI;
+
+  String get threadAI;
+
+  String get industry;
+
   String get noCategoryFound;
 
   String get noProviderFound;

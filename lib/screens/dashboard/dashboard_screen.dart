@@ -1,5 +1,6 @@
 import 'package:booking_system_flutter/component/base_scaffold_widget.dart';
 import 'package:booking_system_flutter/main.dart';
+import 'package:booking_system_flutter/screens/auth/pre_sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/auth/sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/booking/booking_detail_screen.dart';
 import 'package:booking_system_flutter/screens/dashboard/fragment/booking_fragment.dart';
@@ -116,7 +117,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Observer(
                 builder: (context) => appStore.isLoggedIn
                     ? AllOrderListScreen()
-                    : SignInScreen(isFromDashboard: true)),
+                    // : SignInScreen(isFromDashboard: true)),
+                    :PreSigninScreen()),
             ProfileFragment(),
           ][currentIndex],
           bottomNavigationBar: Blur(

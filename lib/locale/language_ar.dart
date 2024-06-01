@@ -16,7 +16,19 @@ class LanguageAr extends BaseLanguage {
   String get getStarted => 'البدء';
 
   @override
+  String get chatBot => 'الدردشة مع منظمة العفو الدولية';
+
+  @override
+  String get generateAI => 'توليد مع الذكاء الاصطناعي';
+
+  @override
   String get signIn => 'تسجيل الدخول';
+
+  @override
+  String get industry => 'صناعة';
+  
+  @override
+  String get threadAI => 'المواضيع منظمة العفو الدولية,';
 
   @override
   String get signUp => 'انشئ حساب';

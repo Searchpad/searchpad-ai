@@ -13,12 +13,14 @@ import 'package:nb_utils/nb_utils.dart';
 Future<LoginResponse> loginCurrentUsers(BuildContext context,
     {required Map<String, dynamic> req,
     bool isSocialLogin = false,
-    bool isOtpLogin = false}) async {
-  appStore.setLoading(true);
+    bool isOtpLogin = false,
+    int index = 1,
+    }) async {
+  if(index == 1) appStore.setLoading(true);
 
   String? uid = req['uid'];
 
-  final userValue = await loginUser(req, isSocialLogin: isSocialLogin);
+  final userValue = await loginUser(req, isSocialLogin: isSocialLogin, index: index);
   if (userValue.userData != null && userValue.userData!.status == 0)
     throw language.accessDeniedContactYourAdmin;
   userValue.userData?.uid = uid;

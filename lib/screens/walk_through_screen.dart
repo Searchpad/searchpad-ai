@@ -1,3 +1,4 @@
+import 'package:booking_system_flutter/screens/auth/pre_sign_in_screen.dart';
 import 'package:booking_system_flutter/screens/dashboard/dashboard_screen.dart';
 import 'package:booking_system_flutter/utils/constant.dart';
 import 'package:booking_system_flutter/utils/images.dart';
@@ -100,7 +101,7 @@ class _WalkThroughScreenState extends State<WalkThroughScreen> {
                       padding: MaterialStateProperty.all(EdgeInsets.zero)),
                   onPressed: () async {
                     await setValue(IS_FIRST_TIME, false);
-                    DashboardScreen().launch(context,
+                    PreSigninScreen().launch(context,
                         isNewTask: true,
                         pageRouteAnimation: PageRouteAnimation.Fade);
                   },

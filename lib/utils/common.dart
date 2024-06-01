@@ -179,10 +179,12 @@ List<LanguageDataModel> languageList() {
 }
 
 InputDecoration inputDecoration(BuildContext context,
-    {Widget? prefixIcon, String? labelText, double? borderRadius}) {
+    {Widget? prefixIcon, String? labelText, double? borderRadius, String? hintText}) {
   return InputDecoration(
     contentPadding: EdgeInsets.only(left: 12, bottom: 10, top: 10, right: 10),
     labelText: labelText,
+    hintText: hintText,
+    hintStyle: secondaryTextStyle(),
     labelStyle: secondaryTextStyle(),
     alignLabelWithHint: true,
     prefixIcon: prefixIcon,

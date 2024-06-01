@@ -1,10 +1,12 @@
 import 'package:booking_system_flutter/component/back_widget.dart';
+import 'package:booking_system_flutter/component/custom_button.dart';
 import 'package:booking_system_flutter/component/loader_widget.dart';
 import 'package:booking_system_flutter/component/selected_item_widget.dart';
 import 'package:booking_system_flutter/main.dart';
 import 'package:booking_system_flutter/model/user_data_model.dart';
 import 'package:booking_system_flutter/network/rest_apis.dart';
 import 'package:booking_system_flutter/screens/auth/email_verification.dart';
+import 'package:booking_system_flutter/screens/auth/referral_screen.dart';
 import 'package:booking_system_flutter/utils/colors.dart';
 import 'package:booking_system_flutter/utils/common.dart';
 import 'package:booking_system_flutter/utils/configs.dart';
@@ -18,6 +20,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:percent_indicator/percent_indicator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'dart:math';
 
 class SignUpScreen extends StatefulWidget {
   final String? phoneNumber;
@@ -40,6 +46,9 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   Country selectedCountry = defaultCountry();
+  String email = "";
+  String baseReferral = "";
+  int baseConfirm = 0;
 
   TextEditingController fNameCont = TextEditingController();
   TextEditingController lNameCont = TextEditingController();
@@ -47,6 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController userNameCont = TextEditingController();
   TextEditingController mobileCont = TextEditingController();
   TextEditingController passwordCont = TextEditingController();
+  TextEditingController referralCode = TextEditingController();
 
   FocusNode fNameFocus = FocusNode();
   FocusNode lNameFocus = FocusNode();
@@ -54,12 +64,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   FocusNode userNameFocus = FocusNode();
   FocusNode mobileFocus = FocusNode();
   FocusNode passwordFocus = FocusNode();
+  FocusNode referralFocus = FocusNode();
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  late CollectionReference thread;
 
   bool isAcceptedTc = false;
 
   @override
   void initState() {
     super.initState();
+    thread = firestore.collection('Referral6');
     init();
   }
 
@@ -75,6 +89,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       userNameCont.text =
           widget.phoneNumber != null ? widget.phoneNumber.toString() : "";
     }
+  }
+
+  String generateRandomCode(int length) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    final random = Random();
+    return String.fromCharCodes(Iterable.generate(
+        length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
   }
 
   @override
@@ -153,11 +174,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         /// Create a temporary request to send
         UserData tempRegisterData = UserData()
-          ..contactNumber = buildMobileNumber()
-          ..firstName = fNameCont.text.trim()
-          ..lastName = lNameCont.text.trim()
+          ..contactNumber = "123456789"
+          ..firstName = emailCont.text.trim()
+          ..lastName = "👋"
           ..userType = USER_TYPE_USER
-          ..username = userNameCont.text.trim()
+          ..username = emailCont.text.trim()
           ..email = emailCont.text.trim()
           ..password = passwordCont.text.trim();
 
@@ -168,6 +189,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> createUsers({required UserData tempRegisterData}) async {
     await createUser(tempRegisterData.toJson()).then((registerResponse) async {
+      if (referralCode.text.trim() != "") {
+        print("ppppppppppppppppp");
+        bool updatedConfirm = false;
+        QuerySnapshot snapshot = await thread.get(); 
+          for (QueryDocumentSnapshot doc in snapshot.docs) {
+            Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+            print(data);
+            if (data["referral"] == referralCode.text.trim() &&
+                !updatedConfirm) {
+              print("11111111----------------------------");
+              email = data["creator"];
+              baseReferral = data['referral'];
+              baseConfirm = data['confirm'] + 1;
+              print("-----------------${data["creator"]}");
+              doc.reference.delete();
+              updatedConfirm = true;
+              thread.add({
+                "creator": email,
+                "referral": baseReferral,
+                "confirm": baseConfirm
+              });
+              String referral = generateRandomCode(6);
+              thread.add({
+                "creator": emailCont.text.trim(),
+                "referral": referral,
+                "confirm": 1
+              });
+              ReferralScreen(email: emailCont.text.trim()).launch(context);
+              break;
+            }
+            print(data);
+          }
+          updatedConfirm = false;
+        print("oooooooooooooooooooooooo");
+      } else {
+        String referral = generateRandomCode(6);
+        thread.add({
+          "creator": emailCont.text.trim(),
+          "referral": referral,
+          "confirm": 1
+        });
+        ReferralScreen(email: emailCont.text.trim()).launch(context);
+      }
       // registerResponse.userData!.password = passwordCont.text.trim();
       // var request;
 
@@ -189,13 +253,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       //   };
       // }
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (BuildContext context) => EmailVerification(
-            response: registerResponse['data'],
-          ),
-        ),
-      );
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(
+      //     builder: (BuildContext context) => EmailVerification(
+      //       response: registerResponse['data'],
+      //     ),
+      //   ),
+      // );
 
       /// Calling Login API
       /// Prem
@@ -220,25 +284,220 @@ class _SignUpScreenState extends State<SignUpScreen> {
   //endregion
 
   //region Widget
+  // Widget _buildTopWidget() {
+  //   return Column(
+  //     children: [
+  //       Container(
+  //         height: 80,
+  //         width: 80,
+  //         padding: EdgeInsets.all(16),
+  //         child: ic_profile2.iconImage(color: Colors.white),
+  //         decoration:
+  //             boxDecorationDefault(shape: BoxShape.circle, color: primaryColor),
+  //       ),
+  //       16.height,
+  //       Text(language.lblHelloUser, style: boldTextStyle(size: 22)).center(),
+  //       16.height,
+  //       Text(language.lblSignUpSubTitle,
+  //               style: secondaryTextStyle(size: 14),
+  //               textAlign: TextAlign.center)
+  //           .center()
+  //           .paddingSymmetric(horizontal: 32),
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildFormWidget() {
+  //   return Column(
+  //     children: [
+  //       32.height,
+  //       AppTextField(
+  //         textFieldType: TextFieldType.NAME,
+  //         controller: fNameCont,
+  //         focus: fNameFocus,
+  //         nextFocus: lNameFocus,
+  //         errorThisFieldRequired: language.requiredText,
+  //         decoration:
+  //             inputDecoration(context, labelText: language.hintFirstNameTxt),
+  //         suffix: ic_profile2.iconImage(size: 10).paddingAll(14),
+  //       ),
+  //       16.height,
+  //       AppTextField(
+  //         textFieldType: TextFieldType.NAME,
+  //         controller: lNameCont,
+  //         focus: lNameFocus,
+  //         nextFocus: userNameFocus,
+  //         errorThisFieldRequired: language.requiredText,
+  //         decoration:
+  //             inputDecoration(context, labelText: language.hintLastNameTxt),
+  //         suffix: ic_profile2.iconImage(size: 10).paddingAll(14),
+  //       ),
+  //       // 16.height,
+  //       // AppTextField(
+  //       //   textFieldType: TextFieldType.USERNAME,
+  //       //   controller: userNameCont,
+  //       //   focus: userNameFocus,
+  //       //   nextFocus: emailFocus,
+  //       //   readOnly: widget.isOTPLogin.validate() ? widget.isOTPLogin : false,
+  //       //   errorThisFieldRequired: language.requiredText,
+  //       //   decoration:
+  //       //       inputDecoration(context, labelText: language.hintUserNameTxt),
+  //       //   suffix: ic_profile2.iconImage(size: 10).paddingAll(14),
+  //       // ),
+  //       16.height,
+  //       AppTextField(
+  //         textFieldType: TextFieldType.EMAIL_ENHANCED,
+  //         controller: emailCont,
+  //         focus: emailFocus,
+  //         errorThisFieldRequired: language.requiredText,
+  //         nextFocus: mobileFocus,
+  //         decoration:
+  //             inputDecoration(context, labelText: language.hintEmailTxt),
+  //         suffix: ic_message.iconImage(size: 10).paddingAll(14),
+  //       ),
+  //       16.height,
+  //       AppTextField(
+  //         textFieldType: isAndroid ? TextFieldType.PHONE : TextFieldType.NAME,
+  //         controller: mobileCont,
+  //         focus: mobileFocus,
+  //         buildCounter: (_,
+  //             {required int currentLength,
+  //             required bool isFocused,
+  //             required int? maxLength}) {
+  //           return TextButton(
+  //             child: Text(language.lblChangeCountry,
+  //                 style: primaryTextStyle(size: 12)),
+  //             onPressed: () {
+  //               changeCountry();
+  //             },
+  //           );
+  //         },
+  //         errorThisFieldRequired: language.requiredText,
+  //         nextFocus: passwordFocus,
+  //         decoration: inputDecoration(context,
+  //                 labelText: "${language.hintContactNumberTxt}")
+  //             .copyWith(
+  //           prefixText: '+${selectedCountry.phoneCode} ',
+  //           hintText: '${language.lblExample}: ${selectedCountry.example}',
+  //           hintStyle: secondaryTextStyle(),
+  //         ),
+  //         maxLength: 15,
+  //         suffix: ic_calling.iconImage(size: 10).paddingAll(14),
+  //       ),
+  //       4.height,
+  //       AppTextField(
+  //         textFieldType: TextFieldType.PASSWORD,
+  //         controller: passwordCont,
+  //         focus: passwordFocus,
+  //         readOnly: widget.isOTPLogin.validate() ? widget.isOTPLogin : false,
+  //         suffixPasswordVisibleWidget:
+  //             ic_show.iconImage(size: 10).paddingAll(14),
+  //         suffixPasswordInvisibleWidget:
+  //             ic_hide.iconImage(size: 10).paddingAll(14),
+  //         errorThisFieldRequired: language.requiredText,
+  //         decoration:
+  //             inputDecoration(context, labelText: language.hintPasswordTxt),
+  //         onFieldSubmitted: (s) {
+  //           if (widget.isOTPLogin) {
+  //             registerWithOTP();
+  //           } else {
+  //             registerUser();
+  //           }
+  //         },
+  //       ),
+  //       20.height,
+  //       _buildTcAcceptWidget(),
+  //       8.height,
+  //       AppButton(
+  //         text: language.signUp,
+  //         color: primaryColor,
+  //         textColor: Colors.white,
+  //         width: context.width() - context.navigationBarHeight,
+  //         onTap: () {
+  //           if (widget.isOTPLogin) {
+  //             registerWithOTP();
+  //           } else {
+  //             registerUser();
+  //           }
+  //         },
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildTcAcceptWidget() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.start,
+  //     children: [
+  //       SelectedItemWidget(isSelected: isAcceptedTc).onTap(() async {
+  //         isAcceptedTc = !isAcceptedTc;
+  //         setState(() {});
+  //       }),
+  //       16.width,
+  //       RichTextWidget(
+  //         list: [
+  //           TextSpan(
+  //               text: '${language.lblAgree} ', style: secondaryTextStyle()),
+  //           TextSpan(
+  //             text: language.lblTermsOfService,
+  //             style: boldTextStyle(color: primaryColor, size: 14),
+  //             recognizer: TapGestureRecognizer()
+  //               ..onTap = () {
+  //                 commonLaunchUrl(TERMS_CONDITION_URL,
+  //                     launchMode: LaunchMode.externalApplication);
+  //               },
+  //           ),
+  //           TextSpan(text: ' & ', style: secondaryTextStyle()),
+  //           TextSpan(
+  //             text: language.privacyPolicy,
+  //             style: boldTextStyle(color: primaryColor, size: 14),
+  //             recognizer: TapGestureRecognizer()
+  //               ..onTap = () {
+  //                 commonLaunchUrl(PRIVACY_POLICY_URL,
+  //                     launchMode: LaunchMode.externalApplication);
+  //               },
+  //           ),
+  //         ],
+  //       ).flexible(flex: 2),
+  //     ],
+  //   ).paddingSymmetric(vertical: 16);
+  // }
+
+  // Widget _buildFooterWidget() {
+  //   return Column(
+  //     children: [
+  //       16.height,
+  //       RichTextWidget(
+  //         list: [
+  //           TextSpan(
+  //               text: "${language.alreadyHaveAccountTxt} ? ",
+  //               style: secondaryTextStyle()),
+  //           TextSpan(
+  //             text: language.signIn,
+  //             style: boldTextStyle(color: primaryColor, size: 14),
+  //             recognizer: TapGestureRecognizer()
+  //               ..onTap = () {
+  //                 finish(context);
+  //               },
+  //           ),
+  //         ],
+  //       ),
+  //       30.height,
+  //     ],
+  //   );
+  // }
+
   Widget _buildTopWidget() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          height: 80,
-          width: 80,
-          padding: EdgeInsets.all(16),
-          child: ic_profile2.iconImage(color: Colors.white),
-          decoration:
-              boxDecorationDefault(shape: BoxShape.circle, color: primaryColor),
-        ),
+        Text("Hello there👋", style: boldTextStyle(size: 28))
+            .paddingSymmetric(horizontal: 10),
         16.height,
-        Text(language.lblHelloUser, style: boldTextStyle(size: 22)).center(),
-        16.height,
-        Text(language.lblSignUpSubTitle,
-                style: secondaryTextStyle(size: 14),
-                textAlign: TextAlign.center)
-            .center()
-            .paddingSymmetric(horizontal: 32),
+        Text(
+          "Please enter your email & password to create an account.",
+          style: primaryTextStyle(size: 14),
+        ).paddingSymmetric(horizontal: 10),
       ],
     );
   }
@@ -247,115 +506,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Column(
       children: [
         32.height,
-        AppTextField(
-          textFieldType: TextFieldType.NAME,
-          controller: fNameCont,
-          focus: fNameFocus,
-          nextFocus: lNameFocus,
-          errorThisFieldRequired: language.requiredText,
-          decoration:
-              inputDecoration(context, labelText: language.hintFirstNameTxt),
-          suffix: ic_profile2.iconImage(size: 10).paddingAll(14),
-        ),
-        16.height,
-        AppTextField(
-          textFieldType: TextFieldType.NAME,
-          controller: lNameCont,
-          focus: lNameFocus,
-          nextFocus: userNameFocus,
-          errorThisFieldRequired: language.requiredText,
-          decoration:
-              inputDecoration(context, labelText: language.hintLastNameTxt),
-          suffix: ic_profile2.iconImage(size: 10).paddingAll(14),
-        ),
-        // 16.height,
-        // AppTextField(
-        //   textFieldType: TextFieldType.USERNAME,
-        //   controller: userNameCont,
-        //   focus: userNameFocus,
-        //   nextFocus: emailFocus,
-        //   readOnly: widget.isOTPLogin.validate() ? widget.isOTPLogin : false,
-        //   errorThisFieldRequired: language.requiredText,
-        //   decoration:
-        //       inputDecoration(context, labelText: language.hintUserNameTxt),
-        //   suffix: ic_profile2.iconImage(size: 10).paddingAll(14),
-        // ),
-        16.height,
-        AppTextField(
-          textFieldType: TextFieldType.EMAIL_ENHANCED,
-          controller: emailCont,
-          focus: emailFocus,
-          errorThisFieldRequired: language.requiredText,
-          nextFocus: mobileFocus,
-          decoration:
-              inputDecoration(context, labelText: language.hintEmailTxt),
-          suffix: ic_message.iconImage(size: 10).paddingAll(14),
-        ),
-        16.height,
-        AppTextField(
-          textFieldType: isAndroid ? TextFieldType.PHONE : TextFieldType.NAME,
-          controller: mobileCont,
-          focus: mobileFocus,
-          buildCounter: (_,
-              {required int currentLength,
-              required bool isFocused,
-              required int? maxLength}) {
-            return TextButton(
-              child: Text(language.lblChangeCountry,
-                  style: primaryTextStyle(size: 12)),
-              onPressed: () {
-                changeCountry();
-              },
-            );
-          },
-          errorThisFieldRequired: language.requiredText,
-          nextFocus: passwordFocus,
-          decoration: inputDecoration(context,
-                  labelText: "${language.hintContactNumberTxt}")
-              .copyWith(
-            prefixText: '+${selectedCountry.phoneCode} ',
-            hintText: '${language.lblExample}: ${selectedCountry.example}',
-            hintStyle: secondaryTextStyle(),
-          ),
-          maxLength: 15,
-          suffix: ic_calling.iconImage(size: 10).paddingAll(14),
-        ),
-        4.height,
+        Form(
+            key: formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              children: [
+                AppTextField(
+                  textFieldType: TextFieldType.EMAIL_ENHANCED,
+                  controller: emailCont,
+                  focus: emailFocus,
+                  errorThisFieldRequired: language.requiredText,
+                  nextFocus: mobileFocus,
+                  decoration: inputDecoration(context,
+                      labelText: language.hintEmailTxt),
+                  suffix: ic_message.iconImage(size: 10).paddingAll(14),
+                ),
+                25.height,
+                AppTextField(
+                  textFieldType: TextFieldType.PASSWORD,
+                  controller: passwordCont,
+                  focus: passwordFocus,
+                  readOnly:
+                      widget.isOTPLogin.validate() ? widget.isOTPLogin : false,
+                  suffixPasswordVisibleWidget: ic_show
+                      .iconImage(size: 10, color: thirdColor)
+                      .paddingAll(14),
+                  suffixPasswordInvisibleWidget: ic_hide
+                      .iconImage(size: 10, color: thirdColor)
+                      .paddingAll(14),
+                  errorThisFieldRequired: language.requiredText,
+                  decoration: inputDecoration(context,
+                      labelText: language.hintPasswordTxt),
+                ),
+                25.height,
+              ],
+            )),
         AppTextField(
           textFieldType: TextFieldType.PASSWORD,
-          controller: passwordCont,
-          focus: passwordFocus,
+          controller: referralCode,
+          focus: referralFocus,
           readOnly: widget.isOTPLogin.validate() ? widget.isOTPLogin : false,
-          suffixPasswordVisibleWidget:
-              ic_show.iconImage(size: 10).paddingAll(14),
-          suffixPasswordInvisibleWidget:
-              ic_hide.iconImage(size: 10).paddingAll(14),
+          suffix: ic_invite.iconImage(size: 10).paddingAll(14),
           errorThisFieldRequired: language.requiredText,
-          decoration:
-              inputDecoration(context, labelText: language.hintPasswordTxt),
-          onFieldSubmitted: (s) {
-            if (widget.isOTPLogin) {
-              registerWithOTP();
-            } else {
-              registerUser();
-            }
-          },
+          decoration: inputDecoration(context,
+              labelText: "Invite Code(optional)",
+              hintText: "Enter Your Invite Code"),
         ),
-        20.height,
+        4.height,
         _buildTcAcceptWidget(),
-        8.height,
-        AppButton(
-          text: language.signUp,
-          color: primaryColor,
-          textColor: Colors.white,
-          width: context.width() - context.navigationBarHeight,
+        Divider(color: context.dividerColor, thickness: 2),
+        16.height,
+        _buildFooterWidget(),
+        InkWell(
           onTap: () {
-            if (widget.isOTPLogin) {
-              registerWithOTP();
-            } else {
-              registerUser();
-            }
+            registerUser();
           },
+          child: CustomButton(
+            'Sign up',
+            0.9,
+            color: thirdColor,
+            index: 3,
+          ),
         ),
       ],
     );
@@ -369,14 +580,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
           isAcceptedTc = !isAcceptedTc;
           setState(() {});
         }),
-        16.width,
+        4.width,
         RichTextWidget(
           list: [
             TextSpan(
-                text: '${language.lblAgree} ', style: secondaryTextStyle()),
+                text: '${language.lblAgree} ',
+                style: primaryTextStyle(size: 12)),
             TextSpan(
               text: language.lblTermsOfService,
-              style: boldTextStyle(color: primaryColor, size: 14),
+              style: boldTextStyle(color: thirdColor, size: 12),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   commonLaunchUrl(TERMS_CONDITION_URL,
@@ -386,7 +598,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             TextSpan(text: ' & ', style: secondaryTextStyle()),
             TextSpan(
               text: language.privacyPolicy,
-              style: boldTextStyle(color: primaryColor, size: 14),
+              style: boldTextStyle(color: thirdColor, size: 12),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   commonLaunchUrl(PRIVACY_POLICY_URL,
@@ -402,15 +614,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _buildFooterWidget() {
     return Column(
       children: [
-        16.height,
         RichTextWidget(
           list: [
             TextSpan(
-                text: "${language.alreadyHaveAccountTxt} ? ",
-                style: secondaryTextStyle()),
+                text: "${language.alreadyHaveAccountTxt}  ",
+                style: primaryTextStyle(size: 14)),
             TextSpan(
               text: language.signIn,
-              style: boldTextStyle(color: primaryColor, size: 14),
+              style: boldTextStyle(color: thirdColor, size: 14),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   finish(context);
@@ -418,7 +629,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ],
         ),
-        30.height,
+        70.height,
+        Divider(color: context.dividerColor, thickness: 2),
+        8.height,
       ],
     );
   }
@@ -432,6 +645,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
         elevation: 0,
         backgroundColor: context.scaffoldBackgroundColor,
         leading: BackWidget(iconColor: context.iconColor),
+        title: Padding(
+          padding: EdgeInsets.all(0.0),
+          child: new LinearPercentIndicator(
+            width: 200.0,
+            lineHeight: 14.0,
+            percent: 0.4,
+            barRadius: Radius.circular(8),
+            backgroundColor: Color(0xFF35383F),
+            progressColor: thirdColor,
+          ),
+        ),
         scrolledUnderElevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle(
             statusBarIconBrightness:
@@ -442,19 +666,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         width: context.width(),
         child: Stack(
           children: [
-            Form(
-              key: formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    _buildTopWidget(),
-                    _buildFormWidget(),
-                    8.height,
-                    _buildFooterWidget(),
-                  ],
-                ),
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildTopWidget(),
+                  _buildFormWidget(),
+                  8.height,
+                ],
               ),
             ),
             Observer(

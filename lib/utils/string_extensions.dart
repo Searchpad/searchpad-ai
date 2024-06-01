@@ -7,17 +7,32 @@ import 'package:nb_utils/nb_utils.dart';
 import 'constant.dart';
 
 extension strEtx on String {
-  Widget iconImage({double? size, Color? color, BoxFit? fit}) {
-    return Image.asset(
-      this,
-      height: size ?? 24,
-      width: size ?? 24,
-      fit: fit ?? BoxFit.cover,
-      color: color ?? (appStore.isDarkMode ? Colors.white : appTextSecondaryColor),
-      errorBuilder: (context, error, stackTrace) {
-        return Image.asset(ic_no_photo, height: size ?? 24, width: size ?? 24);
-      },
-    );
+  Widget iconImage({double? size, Color? color, BoxFit? fit, int? index = 1}) {
+    if (index == 1) {
+      return Image.asset(
+        this,
+        height: size ?? 24,
+        width: size ?? 24,
+        fit: fit ?? BoxFit.cover,
+        color: color ??
+            (appStore.isDarkMode ? Colors.white : appTextSecondaryColor),
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(ic_no_photo,
+              height: size ?? 24, width: size ?? 24);
+        },
+      );
+    } else {
+      return Image.asset(
+        this,
+        height: size ?? 24,
+        width: size ?? 24,
+        fit: fit ?? BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(ic_no_photo,
+              height: size ?? 24, width: size ?? 24);
+        },
+      );
+    }
   }
 
   Color get getPaymentStatusBackgroundColor {
