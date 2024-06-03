@@ -1,5 +1,6 @@
-import 'dart:io'; //InternetAddress utility
 import 'dart:async';
+import 'dart:io'; //InternetAddress utility
+
 import 'package:booking_system_flutter/component/no_internet_connection_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart'; //For StreamController/Stream
@@ -39,7 +40,7 @@ class ConnectionStatusSingleton {
   }
 
   //flutter_connectivity's listener
-  void _connectionChange(ConnectivityResult result) {
+  void _connectionChange(List<ConnectivityResult> result) {
     checkConnection();
   }
 

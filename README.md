@@ -1,4 +1,4 @@
-# Handyman User App
+<!-- # Handyman User App
 
 A new Flutter project.
 
@@ -27,4 +27,4 @@ https://apps.iqonic.design/docs/product/handyman-service/
  Video: https://youtu.be/XI6sGQbuw1M
 
 ## 9. How to generate App Bundles in Android
- Video: https://youtu.be/ZawptmY379s
+ Video: https://youtu.be/ZawptmY379s -->

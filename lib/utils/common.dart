@@ -18,13 +18,13 @@ import 'package:booking_system_flutter/utils/string_extensions.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as custom_tabs;
-import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:html/parser.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart' as urlLaunch;
+
+// import 'package:url_launcher/url_launcher.dart';
 
 import 'constant.dart';
 
@@ -91,8 +91,11 @@ void initializeOneSignal() async {
 }
 
 Future<void> commonLaunchUrl(String address,
-    {LaunchMode launchMode = LaunchMode.inAppWebView}) async {
-  await launchUrl(Uri.parse(address), mode: launchMode).catchError((e) {
+    {urlLaunch.LaunchMode launchMode =
+        urlLaunch.LaunchMode.inAppWebView}) async {
+  await urlLaunch
+      .launchUrl(Uri.parse(address), mode: launchMode)
+      .catchError((e) {
     toast('${language.invalidURL}: $address');
   });
 }
@@ -101,23 +104,24 @@ void launchCall(String? url) {
   if (url.validate().isNotEmpty) {
     if (isIOS)
       commonLaunchUrl('tel://' + url!,
-          launchMode: LaunchMode.externalApplication);
+          launchMode: urlLaunch.LaunchMode.externalApplication);
     else
       commonLaunchUrl('tel:' + url!,
-          launchMode: LaunchMode.externalApplication);
+          launchMode: urlLaunch.LaunchMode.externalApplication);
   }
 }
 
 void launchMap(String? url) {
   if (url.validate().isNotEmpty) {
     commonLaunchUrl(GOOGLE_MAP_PREFIX + url!,
-        launchMode: LaunchMode.externalApplication);
+        launchMode: urlLaunch.LaunchMode.externalApplication);
   }
 }
 
 void launchMail(String url) {
   if (url.validate().isNotEmpty) {
-    commonLaunchUrl('$MAIL_TO$url', launchMode: LaunchMode.externalApplication);
+    commonLaunchUrl('$MAIL_TO$url',
+        launchMode: urlLaunch.LaunchMode.externalApplication);
   }
 }
 
@@ -126,7 +130,7 @@ void checkIfLink(BuildContext context, String value, {String? title}) {
 
   String temp = parseHtmlString(value.validate());
   if (temp.startsWith("https") || temp.startsWith("http")) {
-    launchUrlCustomTab(temp.validate());
+    // launchUrlCustomTab(temp.validate());
   } else if (temp.validateEmail()) {
     launchMail(temp);
   } else if (temp.validatePhone() || temp.startsWith('+')) {
@@ -136,27 +140,27 @@ void checkIfLink(BuildContext context, String value, {String? title}) {
   }
 }
 
-void launchUrlCustomTab(String? url) {
-  if (url.validate().isNotEmpty) {
-    custom_tabs.launch(
-      url!,
-      customTabsOption: custom_tabs.CustomTabsOption(
-        enableDefaultShare: true,
-        enableInstantApps: true,
-        enableUrlBarHiding: true,
-        showPageTitle: true,
-        toolbarColor: primaryColor,
-      ),
-      safariVCOption: custom_tabs.SafariViewControllerOption(
-        preferredBarTintColor: primaryColor,
-        preferredControlTintColor: Colors.white,
-        barCollapsingEnabled: true,
-        entersReaderIfAvailable: true,
-        dismissButtonStyle: SafariViewControllerDismissButtonStyle.close,
-      ),
-    );
-  }
-}
+// void launchUrlCustomTab(String? url) {
+//   if (url.validate().isNotEmpty) {
+//     custom_tabs.launch(
+//       url!,
+//       customTabsOption: custom_tabs.CustomTabsOption(
+//         enableDefaultShare: true,
+//         enableInstantApps: true,
+//         enableUrlBarHiding: true,
+//         showPageTitle: true,
+//         toolbarColor: primaryColor,
+//       ),
+//       safariVCOption: custom_tabs.SafariViewControllerOption(
+//         preferredBarTintColor: primaryColor,
+//         preferredControlTintColor: Colors.white,
+//         barCollapsingEnabled: true,
+//         entersReaderIfAvailable: true,
+//         dismissButtonStyle: SafariViewControllerDismissButtonStyle.close,
+//       ),
+//     );
+//   }
+// }
 
 List<LanguageDataModel> languageList() {
   return [
@@ -452,7 +456,7 @@ Widget mobileNumberInfoWidget() {
         style: boldTextStyle(size: 12, color: primaryColor),
         recognizer: TapGestureRecognizer()
           ..onTap = () {
-            launchUrlCustomTab("https://countrycode.org/");
+            // urlLaunchlaunchUrlCustomTab("https://countrycode.org/");
           },
       ),
     ],
